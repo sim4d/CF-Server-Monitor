@@ -501,7 +501,23 @@ export default {
         await checkResourceAlerts(env);
         debug('[Cron] 资源负载告警检测完成');
       }
+
+      // Hourly tasks now ride on the single minute cron, gated to minute 0 so they
+      // still fire exactly once per hour. The gate is required: checkExpiringServers
+      // only compares the hour against the configured notification hour and has no
+      // per-server dedupe, so running it every minute would resend the same expiry
+      // notification 60 times within that hour.
+      if (minute === 0) {
+        if (day === 0 && hour === 0) {
+          debug('[Cron] 开始执行每周数据清理任务（表轮换）');
+          await weeklyCleanup(env.DB);
+          debug('[Cron] 每周数据清理任务完成');
+        }
+        debug('[Cron] 检查是否到达服务器到期检测时间');
+        await checkExpiringServers(env.DB, { scheduled: true, now: now.getTime() });
+      }
     } else if (cron === '0 * * * *') {
+      // Retained so the existing trigger keeps working until the deploy removes it.
       if (day === 0 && hour === 0) {
         debug('[Cron] 开始执行每周数据清理任务（表轮换）');
         await weeklyCleanup(env.DB);

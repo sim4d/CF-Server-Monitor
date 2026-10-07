@@ -1947,8 +1947,7 @@ Worker 同时注册了 cron 触发器（`scheduled` handler），可在 `wrangle
 
 | Cron          | 行为              | 备注                                                             |
 | ------------- | --------------- | -------------------------------------------------------------- |
-| `*/1 * * * *` | 每分钟：检测离线节点、资源告警 | `checkOfflineNodes`、`checkResourceAlerts`（通知） |
-| `0 * * * *`   | 每小时：根据 UTC 日期分支 | 见下表                                                            |
+| `*/1 * * * *` | 每分钟：检测离线节点、资源告警；分钟数为 0 时按 UTC 日期分支执行每小时任务 | `checkOfflineNodes`、`checkResourceAlerts`（通知），见下表 |
 | <br />        | 每周日 0 点：表轮换    | `weeklyCleanup`（删除旧表、重命名 metrics\_history → metrics\_history\_old、创建新表） |
 | <br />        | 每小时按通知时区/到期提醒时间判断是否执行到期检测 | `checkExpiringServers` |
 
